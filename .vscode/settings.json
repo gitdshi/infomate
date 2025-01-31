@@ -1,0 +1,8 @@
+{
+    "cSpell.words": [
+        "nextcloud"
+    ],
+    "scss.completion.completePropertyWithSemicolon": true,
+    "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
+    "css.completion.completePropertyWithSemicolon": true
+}
