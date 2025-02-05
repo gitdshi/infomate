@@ -40,6 +40,7 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	#[FrontpageRoute(verb: 'GET', url: '/')]
 	public function index(): TemplateResponse {
+		/*
 		$this->eventDispatcher->dispatchTyped(new RenderReferenceEvent());
 // 		try {
 // 			$notes = $this->noteMapper->getNotesOfUser($this->userId);
@@ -53,6 +54,7 @@ class PageController extends Controller {
 			'selected_note_id' => $selectedNoteId,
 		];
 		$this->initialStateService->provideInitialState('notes-initial-state', $state);
+		*/
 		return new TemplateResponse(Application::APP_ID, 'main');
 	}
 }

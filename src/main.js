@@ -1,6 +1,15 @@
 import Vue from 'vue'
-import App from './views/App.vue'
+import App from './App.vue'
+
+/*
+new Vue(
+    {
+        render: h => h(App)
+    }
+).$mount('#app')
+*/
+
 Vue.mixin({ methods: { t, n } })
 
-const VueApp = Vue.extend(App)
-new VueApp().$mount('#content')
+const View = Vue.extend(App)
+new View().$mount('#infomate')
