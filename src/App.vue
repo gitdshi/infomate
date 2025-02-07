@@ -12,7 +12,8 @@ import {
 	NcAppNavigationNewItem,
 	NcAppNavigationItem,
 	NcButton,
-	NcTextField
+	NcTextField,
+	NcTextArea,
 } from '@nextcloud/vue'
 
 import { t } from '@nextcloud/l10n'
@@ -25,13 +26,14 @@ export default {
 		Plus,
 		NcButton,
 		NcTextField,
+		NcTextArea,
 		NcContent,
 		NcAppContent,
 		NcEmptyContent,
 		NcAppNavigation,
 		NcAppNavigationNewItem,
 		NcAppNavigationList,
-		NcAppNavigationItem
+		NcAppNavigationItem,
 	},
 
 	data() {
@@ -40,7 +42,7 @@ export default {
 			chatHistory: ref([]),
 			activeChatId: ref(null),
 			newMessage: ref(''),
-			messages: ref([])
+			messages: ref([]),
 		}
 	},
 
@@ -136,6 +138,7 @@ if (chatHistory.value.length === 0) {
 				</div>
 
 				<div class="message-input">
+					<!--
 					<NcTextField
 						ref="inputField"
 						:value.sync="newMessage"
@@ -144,14 +147,23 @@ if (chatHistory.value.length === 0) {
 						:show-trailing-button="newMessage !== ''"
 						trailing-button-label="Send"
 						@trailing-button-click="sendMessage" />
+					-->
+					<NcTextArea label="Message"
+						v-model="text1"
+						:placeholder="t('infomate', 'Type your message here...')"
+						helper-text="This is a regular helper text."
+						@keydown.enter="sendMessage">
+						<template #icon>
+							<Chat :size="20" />
+						</template>
+					</NcTextArea>
 					<NcButton></NcButton>
 					<NcEmptyContent> </NcEmptyContent>
+					<NcTextField></NcTextField>
 				</div>
-
 			</div>
 		</NcAppContent>
 	</NcContent>
-
 </template>
 
 <style lang="scss">

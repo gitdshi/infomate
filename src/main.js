@@ -1,13 +1,9 @@
+import { generateFilePath } from '@nextcloud/router'
 import Vue from 'vue'
 import App from './App.vue'
 
-/*
-new Vue(
-    {
-        render: h => h(App)
-    }
-).$mount('#app')
-*/
+// eslint-disable-next-line
+__webpack_public_path__ = generateFilePath('infomate', '', 'js/')
 
 Vue.mixin({ methods: { t, n } })
 
