@@ -1,0 +1,18 @@
+@import 'variables';
+@import '~@nextcloud/vue/dist/style.css';
+
+// 自定义变量
+:root {
+  --content-padding: 20px;
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .infomate-container {
+    flex-direction: column;
+    
+    .infomate-content {
+      height: calc(100vh - 200px);
+    }
+  }
+}

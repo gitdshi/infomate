@@ -1,0 +1,11 @@
+{
+    "cSpell.words": [
+        "infomate",
+        "nextcloud",
+        "tabler",
+        "vueuse"
+    ],
+    "scss.completion.completePropertyWithSemicolon": true,
+    "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
+    "css.completion.completePropertyWithSemicolon": true
+}
