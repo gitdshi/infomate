@@ -208,20 +208,4 @@ export default {
 	bottom: 10px;
 	border-top: 1px solid var(--color-border);
 }
-
-.new-chat-btn {
-	width: 100%;
-	justify-content: center;
-	margin: 8px 0;
-}
-
-.chat-history-item {
-	&:hover {
-		background-color: var(--color-background-hover);
-	}
-
-	&.active {
-    background-color: var(--color-primary-element-light) !important;
-	}
-}
 </style>
