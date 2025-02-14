@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import Chat from 'vue-material-design-icons/Chat.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-
 import {
 	NcContent,
 	NcAppContent,
@@ -12,8 +11,9 @@ import {
 	NcAppNavigationItem,
 	NcRichContenteditable,
 } from '@nextcloud/vue'
-
 import { t } from '@nextcloud/l10n'
+import DOMPurify from 'dompurify'
+import { streamMessages } from './services/message.js'
 
 export default {
 	name: 'App',
@@ -80,16 +80,36 @@ export default {
 					sender: 'user',
 					timestamp: new Date(),
 				})
-				this.messages.push({
+				const messageAI = {
 					id: Date.now() + 1,
 					chatId: this.activeChatId,
-					content: this.newMessage,
+					content: 'thinking...',
 					sender: 'assistant',
 					timestamp: new Date(),
-				})
-				// 这里添加AI回复逻辑
+				}
+				this.messages.push(messageAI)
+
+				// send the message to infomate-mind, and get the response.
+				this.startStreaming(this.newMessage, messageAI)
+
 				this.newMessage = ''
 			}
+		},
+		startStreaming(question, messageAI) {
+			streamMessages(question, messageAI, this.handleMessage, this.handleError)
+		},
+		handleMessage(chunk, messageAI) {
+			// Process the chunk of data received from the stream
+			if (messageAI.content === 'thinking...') {
+				messageAI.content = ''
+			}
+			messageAI.content = messageAI.content + chunk.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')
+
+			console.info('Received chunk:', chunk)
+		},
+		handleError(error) {
+			// Handle any errors that occur during the streaming process
+			console.error('Streaming error:', error)
 		},
 		adjustMessageArea() {
 			const divMessageArea = document.getElementById('messageArea')
@@ -98,6 +118,9 @@ export default {
 		},
 		formatTime(date) {
 			return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+		},
+		sanitizeContent(content) {
+			return DOMPurify.sanitize(content)
 		},
 		t(key, ...args) {
 			return t('infomate', key, ...args)
@@ -140,9 +163,7 @@ export default {
 							<div class="message-time">
 								{{ formatTime(message.timestamp) }}
 							</div>
-							<div class="message-content">
-								{{ message.content }}
-							</div>
+							<div class="message-content" v-html="sanitizeContent(message.content)" />
 						</div>
 					</div>
 
