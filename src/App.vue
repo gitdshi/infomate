@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import Chat from 'vue-material-design-icons/Chat.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-
 import {
 	NcContent,
 	NcAppContent,
@@ -12,8 +11,9 @@ import {
 	NcAppNavigationItem,
 	NcRichContenteditable,
 } from '@nextcloud/vue'
-
 import { t } from '@nextcloud/l10n'
+import DOMPurify from 'dompurify'
+import { loadMessages, streamMessages } from './services/message.js'
 
 export default {
 	name: 'App',
@@ -49,20 +49,48 @@ export default {
 	watch: {
 		activeMessages() {
 			this.$nextTick(() => {
-				this.adjustMessageArea()
+				this.scrollToBottom()
 			})
 		},
 	},
 
+	created() {
+		this.loadData()
+	},
+
 	mounted() {
-		this.createNewChat()
+		// this.createNewChat()
 	},
 
 	methods: {
+		loadData() {
+			setTimeout(async () => {
+				try {
+					const data = await loadMessages('admin', this.handleError)
+					this.chatHistory = data.threads.map(thread => ({
+						id: thread.slug,
+						title: thread.name,
+					}))
+
+					this.messages = data.threads.flatMap(thread =>
+						thread.chats.map(chatMessage => ({
+							chatId: thread.slug,
+							content: chatMessage.content,
+							sender: chatMessage.role,
+							timestamp: new Date(Number(chatMessage.sentAt)),
+						})),
+					)
+					this.createNewChat()
+					console.info(this.chatHistory)
+				} catch (error) {
+					this.handleError(error)
+				}
+			}, 5000)
+		},
 		createNewChat() {
 			const newChat = {
 				id: Date.now(),
-				title: `Chat ${this.chatHistory.length + 1}`,
+				title: 'New Chat',
 				timestamp: new Date(),
 			}
 			this.chatHistory.push(newChat)
@@ -80,24 +108,61 @@ export default {
 					sender: 'user',
 					timestamp: new Date(),
 				})
-				this.messages.push({
+				const messageAI = {
 					id: Date.now() + 1,
 					chatId: this.activeChatId,
-					content: this.newMessage,
+					content: 'thinking...',
 					sender: 'assistant',
 					timestamp: new Date(),
-				})
-				// 这里添加AI回复逻辑
+				}
+				this.messages.push(messageAI)
+
+				// send the message to infomate-mind, and get the response.
+				this.startStreaming(this.newMessage, messageAI)
+
+				// Update the active chat history title if it is 'New Chat'
+				const activeChat = this.chatHistory.find(chat => chat.id === this.activeChatId)
+				if (activeChat && activeChat.title === 'New Chat') {
+					activeChat.title = this.newMessage.substring(0, 30)
+				}
+
 				this.newMessage = ''
+
+				this.$nextTick(() => {
+					this.scrollToBottom()
+				})
 			}
 		},
-		adjustMessageArea() {
+		startStreaming(question, messageAI) {
+			streamMessages(question, messageAI, this.handleMessage, this.handleError)
+		},
+		handleMessage(chunk, messageAI) {
+			// Process the chunk of data received from the stream
+			if (messageAI.content === 'thinking...') {
+				messageAI.content = ''
+			}
+			messageAI.content = messageAI.content + chunk.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')
+
+			console.info('Received chunk:', chunk)
+
+			this.$nextTick(() => {
+				this.scrollToBottom()
+			})
+		},
+		handleError(error) {
+			// Handle any errors that occur during the process
+			console.error('Error:', error)
+		},
+		scrollToBottom() {
 			const divMessageArea = document.getElementById('messageArea')
 			divMessageArea.style.minHeight = `${document.getElementById('messageContainer').offsetHeight + document.getElementById('messageInput').offsetHeight + 50}px`
 			divMessageArea.scrollIntoView(false, { behavior: 'smooth' })
 		},
 		formatTime(date) {
 			return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+		},
+		sanitizeContent(content) {
+			return DOMPurify.sanitize(content)
 		},
 		t(key, ...args) {
 			return t('infomate', key, ...args)
@@ -140,9 +205,7 @@ export default {
 							<div class="message-time">
 								{{ formatTime(message.timestamp) }}
 							</div>
-							<div class="message-content">
-								{{ message.content }}
-							</div>
+							<div class="message-content" v-html="sanitizeContent(message.content)" />
 						</div>
 					</div>
 

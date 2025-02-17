@@ -23,7 +23,8 @@
     "@nextcloud/router": "3.0.1",
     "@nextcloud/axios": "^2.5.1",
     "vue-material-design-icons": "^4.13.0",
-    "vue":"^2.6.11"
+    "vue":"^2.6.11",
+    "dompurify": "3.2.4"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.1",
