@@ -1,15 +1,26 @@
-import { INFOMATE_MIND_API_BASE_URL, INFOMATE_MIND_LLM_MODEL } from '../config.js'
+import { INFOMATE_MIND_API_BASE_URL } from '../config.js'
 
 export async function streamMessages(question, messageAI, onMessage, onError) {
 	try {
-		const apiUrl = INFOMATE_MIND_API_BASE_URL + '/stream?model=' + INFOMATE_MIND_LLM_MODEL + '&message=' + question
+		const apiUrl = INFOMATE_MIND_API_BASE_URL + '/anything/streamchat'
+
+		const controller = new AbortController()
+		const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 seconds timeout
 
 		const response = await fetch(apiUrl, {
-			method: 'GET',
+			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
+			body: JSON.stringify({
+				workspace: 'admin',
+				thread: String(messageAI.chatId),
+				message: question,
+			}),
+			signal: controller.signal,
 		})
+
+		clearTimeout(timeoutId)
 
 		if (!response.ok) {
 			console.error(response)
@@ -38,5 +49,27 @@ export async function streamMessages(question, messageAI, onMessage, onError) {
 		}
 	} catch (error) {
 		onError(error)
+	}
+}
+
+export async function loadMessages(workspace, onError) {
+	const apiUrl = `${INFOMATE_MIND_API_BASE_URL}/anything/messages`
+
+	try {
+		const response = await fetch(`${apiUrl}?workspace=${workspace}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`)
+		}
+
+		return await response.json()
+	} catch (error) {
+		onError(error)
+		return null
 	}
 }

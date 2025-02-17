@@ -13,7 +13,7 @@ import {
 } from '@nextcloud/vue'
 import { t } from '@nextcloud/l10n'
 import DOMPurify from 'dompurify'
-import { streamMessages } from './services/message.js'
+import { loadMessages, streamMessages } from './services/message.js'
 
 export default {
 	name: 'App',
@@ -49,20 +49,48 @@ export default {
 	watch: {
 		activeMessages() {
 			this.$nextTick(() => {
-				this.adjustMessageArea()
+				this.scrollToBottom()
 			})
 		},
 	},
 
+	created() {
+		this.loadData()
+	},
+
 	mounted() {
-		this.createNewChat()
+		// this.createNewChat()
 	},
 
 	methods: {
+		loadData() {
+			setTimeout(async () => {
+				try {
+					const data = await loadMessages('admin', this.handleError)
+					this.chatHistory = data.threads.map(thread => ({
+						id: thread.slug,
+						title: thread.name,
+					}))
+
+					this.messages = data.threads.flatMap(thread =>
+						thread.chats.map(chatMessage => ({
+							chatId: thread.slug,
+							content: chatMessage.content,
+							sender: chatMessage.role,
+							timestamp: new Date(Number(chatMessage.sentAt)),
+						})),
+					)
+					this.createNewChat()
+					console.info(this.chatHistory)
+				} catch (error) {
+					this.handleError(error)
+				}
+			}, 5000)
+		},
 		createNewChat() {
 			const newChat = {
 				id: Date.now(),
-				title: `Chat ${this.chatHistory.length + 1}`,
+				title: 'New Chat',
 				timestamp: new Date(),
 			}
 			this.chatHistory.push(newChat)
@@ -92,7 +120,17 @@ export default {
 				// send the message to infomate-mind, and get the response.
 				this.startStreaming(this.newMessage, messageAI)
 
+				// Update the active chat history title if it is 'New Chat'
+				const activeChat = this.chatHistory.find(chat => chat.id === this.activeChatId)
+				if (activeChat && activeChat.title === 'New Chat') {
+					activeChat.title = this.newMessage.substring(0, 30)
+				}
+
 				this.newMessage = ''
+
+				this.$nextTick(() => {
+					this.scrollToBottom()
+				})
 			}
 		},
 		startStreaming(question, messageAI) {
@@ -106,12 +144,16 @@ export default {
 			messageAI.content = messageAI.content + chunk.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')
 
 			console.info('Received chunk:', chunk)
+
+			this.$nextTick(() => {
+				this.scrollToBottom()
+			})
 		},
 		handleError(error) {
-			// Handle any errors that occur during the streaming process
-			console.error('Streaming error:', error)
+			// Handle any errors that occur during the process
+			console.error('Error:', error)
 		},
-		adjustMessageArea() {
+		scrollToBottom() {
 			const divMessageArea = document.getElementById('messageArea')
 			divMessageArea.style.minHeight = `${document.getElementById('messageContainer').offsetHeight + document.getElementById('messageInput').offsetHeight + 50}px`
 			divMessageArea.scrollIntoView(false, { behavior: 'smooth' })
