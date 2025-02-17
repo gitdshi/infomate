@@ -13,7 +13,6 @@ use OCP\Util;
 class Application extends App implements IBootstrap {
 
 	public const APP_ID = 'infomate';
-//	public const NOTE_FOLDER_NAME = 'TutorialNotes';
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
