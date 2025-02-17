@@ -6,15 +6,11 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import {
 	NcContent,
 	NcAppContent,
-	// NcEmptyContent,
 	NcAppNavigation,
 	NcAppNavigationList,
 	NcAppNavigationNew,
 	NcAppNavigationItem,
 	NcRichContenteditable,
-	// NcButton,
-	// NcTextField,
-	// NcTextArea,
 } from '@nextcloud/vue'
 
 import { t } from '@nextcloud/l10n'
@@ -25,13 +21,9 @@ export default {
 	components: {
 		Chat,
 		Plus,
-		// NcButton,
-		// NcTextField,
 		NcRichContenteditable,
-		// NcTextArea,
 		NcContent,
 		NcAppContent,
-		// NcEmptyContent,
 		NcAppNavigation,
 		NcAppNavigationNew,
 		NcAppNavigationList,
@@ -164,31 +156,6 @@ export default {
 			</NcAppContent>
 		</div>
 	</NcContent>
-	<!--
-	<NcTextField
-		ref="inputField"
-		:value.sync="newMessage"
-		:placeholder="t('infomate', 'Type your message...')"
-		:show-trailing-button="newMessage !== ''"
-		trailing-button-icon="arrowRight"
-		trailing-button-label="Send"
-		@keydown.enter="sendMessage"
-		@trailing-button-click="sendMessage" />
-	<NcTextArea label="Message"
-		v-model="text1"
-		:placeholder="t('infomate', 'Type your message here...')"
-		helper-text="This is a regular helper text."
-		@keydown.enter="sendMessage">
-		<template #icon>
-			<Chat :size="20" />
-		</template>
-	</NcTextArea>
-	-->
-	<!--
-	<NcButton></NcButton>
-	<NcEmptyContent> </NcEmptyContent>
-	<NcTextField></NcTextField>
-	-->
 </template>
 
 <style lang="scss">
@@ -240,21 +207,5 @@ export default {
 	position: fixed;
 	bottom: 10px;
 	border-top: 1px solid var(--color-border);
-}
-
-.new-chat-btn {
-	width: 100%;
-	justify-content: center;
-	margin: 8px 0;
-}
-
-.chat-history-item {
-	&:hover {
-		background-color: var(--color-background-hover);
-	}
-
-	&.active {
-    background-color: var(--color-primary-element-light) !important;
-	}
 }
 </style>
