@@ -5,7 +5,7 @@ export async function streamMessages(question, messageAI, onMessage, onError) {
 		const apiUrl = INFOMATE_MIND_API_BASE_URL + '/anything/streamchat'
 
 		const controller = new AbortController()
-		const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 seconds timeout
+		const timeoutId = setTimeout(() => controller.abort(), 300000) // 5 mins timeout
 
 		const response = await fetch(apiUrl, {
 			method: 'POST',
